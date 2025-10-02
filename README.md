@@ -2,6 +2,8 @@
 Example dashboard tiles for Google SecOps.
 [Wrangling Risk: Browser Security and Management](https://reg.jnuc.jamf.com/flow/jamf/jnuc2025/sessioncatalog2025/page/sessioncatalog/session/1745010503044001HBf9) @ [JNUC 2025](https://reg.jnuc.jamf.com/flow/jamf/jnuc2025/home25/page/jnuc2025home)
 
+## Jamf Pro MDM Feed
+
 ### Computer OS version pie chart
 ```
 metadata.log_type = "JAMF_PRO_MDM"
@@ -53,6 +55,48 @@ outcome:
 - Y-axis field: count
 - Group by: os
 - Group Type: default
+
+## Jamf Protect Feed
+
+### Mount Events Breakdown
+```
+metadata.log_type = "JAMF_TELEMETRY" OR metadata.log_type = "JAMF_TELEMETRY_V2"
+metadata.product_event_type = "mount"
+$protocol = additional.fields["mount_device_protocol"]
+target.asset.hardware.manufacturer != "" and target.asset.hardware.model != ""
+match:
+    principal.asset.hostname,$protocol,target.asset.hardware.manufacturer,target.asset.hardware.model
+outcome:
+    $count = count(metadata.product_event_type)
+order:
+	$count desc
+```
+- Visualization: pie chart
+- Field of data: protocol
+- Value of data: count
+- Donut chart: ✅
+
+### Process Names
+```
+metadata.log_type = "JAMF_TELEMETRY" OR metadata.log_type = "JAMF_TELEMETRY_V2"
+metadata.product_event_type = "exec"
+//target.process.file.signature_info.codesign.id = ""
+additional.fields["exec_target_is_platform_binary"] = "false"
+$process = re.capture(target.process.file.full_path, `[^\/]+$`)
+match:
+    $process
+outcome:
+    $count = count($process)
+order:
+    $count desc
+limit:
+    10
+```
+- Visualization: pie chart
+- Field of data: Source_Store
+- Value of data: count
+
+## Chrome Management Feed
 
 ### Chrome extension source
 ```
