@@ -18,6 +18,25 @@ order:
 - Field of data: os
 - Value of data: osversion_count
 
+### Computer OS major version pie chart
+```
+metadata.log_type = "JAMF_PRO_MDM"
+extracted.fields["webhook.webhookEvent"] = "ComputerInventoryCompleted"
+$os = re.capture(extracted.fields["event.osVersion"], `^[\d]*`)
+match:
+  $os
+outcome:
+  $osversion_count = count_distinct(metadata.id)
+order:
+  $osversion_count desc
+limit:
+  3
+```
+- Visualization type: pie chart
+- Field of data: os
+- Value of data: osversion_count
+- Note: adjust limit to show wider spread of major OS version if needed
+
 ### Computer OS version adoption line chart
 ```
 metadata.log_type = "JAMF_PRO_MDM"
